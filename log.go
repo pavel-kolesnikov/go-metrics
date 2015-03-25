@@ -76,25 +76,41 @@ func LogCompact(r Registry, d time.Duration, l *log.Logger) {
 		r.Each(func(name string, i interface{}) {
 			switch metric := i.(type) {
 			case Counter:
-				l.Printf("counter %s -- count: %d\n", name, metric.Count())
+				l.Printf("count %20s,count:%9d\n", name, metric.Count())
 			case Gauge:
-				l.Printf("gauge %s -- value: %d\n", name, metric.Value())
+				l.Printf("gauge %20s,value:%9d\n", name, metric.Value())
 			case GaugeFloat64:
-				l.Printf("gauge %s -- value: %f\n", name, metric.Value())
+				l.Printf("gauge %20s,value:%9f\n", name, metric.Value())
 			case Healthcheck:
 				metric.Check()
-				l.Printf("healthcheck %s -- error : %v\n", name, metric.Error())
+				l.Printf("check %20s,error: %v\n", name, metric.Error())
 			case Histogram:
 				h := metric.Snapshot()
 				ps := h.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
-				l.Printf("histogram %s -- count:%d   min:%4d  -  mean:%4d  -  95:%4d  -  99:%5d  -  max:%5d\n", name, h.Count(), int(h.Min()/10e6), int(h.Mean()/10e6), int(ps[2]/10e6), int(ps[3]/10e6), int(h.Max()/10e6))
+				l.Printf("hgram %20s,count:%9d,min:%4.2f,mean:%4.2f,95%%:%4.2f,99%%:%5.2f,max:%5.2f\n",
+					name, h.Count(),
+					time.Duration(h.Min()).Seconds(),
+					time.Duration(h.Mean()).Seconds(),
+					time.Duration(ps[2]).Seconds(),
+					time.Duration(ps[3]).Seconds(),
+					time.Duration(h.Max()).Seconds(),
+				)
 			case Meter:
 				m := metric.Snapshot()
-				l.Printf("meter %s -- count: %d  1mrate:%12.2f  -  5mrate:%12.2f  -  meanrate:  %12.2f\n", name, m.Count(), m.Rate1(), m.Rate5(), m.RateMean())
+				l.Printf("meter %20s,count:%9d,1mrate:%12.2f,5mrate:%12.2f,meanrate:%12.2f/s\n",
+					name, m.Count(), m.Rate1(), m.Rate5(), m.RateMean())
 			case Timer:
 				t := metric.Snapshot()
 				ps := t.Percentiles([]float64{0.5, 0.75, 0.95, 0.99, 0.999})
-				l.Printf("timer %s -- count:%d   min:%4d  -  mean:%4d  -  95:%4d  -  99:%5d  -  max:%5d\n", name, t.Count(), int(t.Min()/10e6), int(t.Mean()/10e6), int(ps[2]/10e6), int(ps[3]/10e6), int(t.Max()/10e6))
+				l.Printf("timer %20s,count:%9d,meanrate:%4.2f/s,min:%4.2f,mean:%4.2f,95%%:%4.2f,99%%:%5.2f,max:%5.2f\n",
+					name, t.Count(),
+					t.RateMean(),
+					time.Duration(t.Min()).Seconds(),
+					time.Duration(t.Mean()).Seconds(),
+					time.Duration(ps[2]).Seconds(),
+					time.Duration(ps[3]).Seconds(),
+					time.Duration(t.Max()).Seconds(),
+				)
 			}
 		})
 	}
