@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"go-metrics"
 	"time"
+
+	"github.com/pavel-kolesnikov/go-metrics"
 )
 
 func main() {
