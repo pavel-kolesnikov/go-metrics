@@ -23,17 +23,17 @@ func translateTimerAttributes(d time.Duration) (attrs map[string]interface{}) {
 
 type Reporter struct {
 	Email, Token    string
+	Namespace       string
 	Source          string
 	Interval        time.Duration
 	Registry        metrics.Registry
 	Percentiles     []float64              // percentiles to report on histogram metrics
 	TimerAttributes map[string]interface{} // units in which timers will be displayed
 	intervalSec     int64
-	MetricPrefix    string
 }
 
 func NewReporter(r metrics.Registry, d time.Duration, e string, t string, s string, p []float64, u time.Duration) *Reporter {
-	return &Reporter{e, t, s, d, r, p, translateTimerAttributes(u), int64(d / time.Second)}
+	return &Reporter{e, t, "", s, d, r, p, translateTimerAttributes(u), int64(d / time.Second)}
 }
 
 func Librato(r metrics.Registry, d time.Duration, e string, t string, s string, p []float64, u time.Duration) {
@@ -41,6 +41,7 @@ func Librato(r metrics.Registry, d time.Duration, e string, t string, s string, 
 }
 
 func (self *Reporter) Run() {
+	log.Printf("WARNING: This client has been DEPRECATED! It has been moved to https://github.com/mihasya/go-metrics-librato and will be removed from rcrowley/go-metrics on August 5th 2015")
 	ticker := time.Tick(self.Interval)
 	metricsApi := &LibratoClient{self.Email, self.Token}
 	for now := range ticker {
@@ -88,8 +89,8 @@ func (self *Reporter) BuildRequest(now time.Time, r metrics.Registry) (snapshot 
 	snapshot.Counters = make([]Measurement, 0)
 	histogramGaugeCount := 1 + len(self.Percentiles)
 	r.Each(func(name string, metric interface{}) {
-		if self.MetricPrefix != "" {
-			name = self.MetricPrefix + name
+		if self.Namespace != "" {
+			name = fmt.Sprintf("%s.%s", self.Namespace, name)
 		}
 		measurement := Measurement{}
 		measurement[Period] = self.Interval.Seconds()

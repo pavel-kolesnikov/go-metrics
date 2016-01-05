@@ -1,7 +1,9 @@
 go-metrics
 ==========
 
-Go port of Coda Hale's Metrics library: <https://github.com/codahale/metrics>.
+![travis build status](https://travis-ci.org/pavel-kolesnikov/go-metrics.svg?branch=master)
+
+Go port of Coda Hale's Metrics library: <https://github.com/dropwizard/metrics>.
 
 Documentation: <http://godoc.org/github.com/rcrowley/go-metrics>.
 
@@ -51,7 +53,7 @@ Periodically emit every metric to Graphite:
 
 ```go
 addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:2003")
-go metrics.Graphite(metrics.DefaultRegistry, 10e9, "metrics.", addr)
+go graphite.Graphite(metrics.DefaultRegistry, 10e9, "metrics", addr)
 ```
 
 Periodically emit every metric into InfluxDB:
@@ -88,19 +90,6 @@ Periodically emit every metric to StatHat:
 import "github.com/rcrowley/go-metrics/stathat"
 
 go stathat.Stathat(metrics.DefaultRegistry, 10e9, "example@example.com")
-```
-
-Maintain all metrics along with expvars at `/debug/vars2`:
-
-This uses the same mechanism as [the official expvar](http://golang.org/pkg/expvar/)
-but exposed under `/debug/vars2`, which shows a json representation of all your usual expvars
-as well as all your go-metrics.
-
-
-```go
-import "github.com/rcrowley/go-metrics/exp"
-
-exp.Exp(metrics.DefaultRegistry)
 ```
 
 Installation
