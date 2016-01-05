@@ -3,11 +3,12 @@
 package exp
 
 import (
-	"go-metrics"
 	"expvar"
 	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/pavel-kolesnikov/go-metrics"
 )
 
 type exp struct {
